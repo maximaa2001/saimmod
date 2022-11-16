@@ -1,4 +1,4 @@
-package by.bsuir.v27.smo;
+package by.bsuir.v27;
 
 import java.util.Objects;
 

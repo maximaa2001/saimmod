@@ -8,7 +8,6 @@ import javafx.scene.control.TextField;
 
 import java.net.URL;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -49,41 +48,28 @@ public class Controller {
                 incorrectLabel.setText("Некорректный ввод");
             }
             SMO smo = new SMO(pi1, pi2, 2);
-            double A = 0;
             double K1 = 0, K2 = 0;
             double Lo = 0, Lc = 0;
             int numberOfSteps = 100000;
             for (int i = 0; i < numberOfSteps; i++) {
                 smo.nextStep();
             }
-            Map<by.bsuir.v27.smo.State, Integer> countStates = smo.getCountStates();
-            Iterator<Map.Entry<by.bsuir.v27.smo.State, Integer>> iterator = countStates.entrySet().iterator();
+            Map<State, Integer> countStates = smo.getCountStates();
+            Iterator<Map.Entry<State, Integer>> iterator = countStates.entrySet().iterator();
             String result = "";
             while (iterator.hasNext()) {
-                Map.Entry<by.bsuir.v27.smo.State, Integer> next = iterator.next();
+                Map.Entry<State, Integer> next = iterator.next();
                 if (next.getValue() != 1) {
                     double P = (double) next.getValue() / numberOfSteps;
                     System.out.println("P" + next.getKey() + " = " + P);
                     result = result.concat("P" + next.getKey().toString() + " = " + P + "\n");
-                    if (next.getKey().getChannel1State() == 1) {
-                        K1 += P;
-                    }
-                    if (next.getKey().getChannel2State() == 1) {
-                        K2 += P;
-                    }
-                    if (next.getKey().getQueueState() > 0) {
-                        Lo += P * next.getKey().getQueueState();
-                    }
-                    int count = 0;
-                    count += next.getKey().getChannel1State();
-                    count += next.getKey().getQueueState();
-                    count += next.getKey().getChannel2State();
-                    if (count > 0) {
-                        Lc += P * count;
-                    }
                 }
             }
-            A = K2 * (1 - pi2);
+            double A = (double) smo.getFinishCount() / numberOfSteps;
+            K1 = (double) smo.getChanel1State() / numberOfSteps;
+            K2 = (double) smo.getChanel2State() / numberOfSteps;
+            Lo = (double) smo.getQueueLength() / numberOfSteps;
+            Lc = (double) smo.getSystemLength() / numberOfSteps;
             System.out.println("K1 " + K1);
             System.out.println("K2 " + K2);
             System.out.println("A " + A);
@@ -91,15 +77,17 @@ public class Controller {
             System.out.println("Lc " + Lc);
 
             double pBlock = 0;
-            double pRej = (double) smo.getRejectedCount() / numberOfSteps;
-            //  System.out.println(pRej);
-//            double Q = 1 - pRej;
-//            double W1 = 1 / (1 - p1);
-//            double W2 = (A2 / (A2 + A3)) / (1 - p2);
-//            double W3 = (A3 / (A2 + A3)) / (1 - p3);
-//            double Wc = W1 + W2 + W3;
-//            result += "Pотк=" + pRej + "\n" + "Pблок=" + pBlock + "\n" + "Qотн=" + Q + "\n" + "A=" + A + "\n" + "Wc=" + Wc + "\n" +
-//                    "K1=" + K1 + "\n" + "K2=" + K2 + "\n" + "K3=" + K3 + "\n";
+            double pRej = (double) smo.getRejectedCount() / smo.getSourceGeneratedCount();
+            double Q = (double) smo.getFinishCount() / smo.getSourceGeneratedCount();
+            System.out.println("pBlock " + pBlock);
+            System.out.println("pRej " + pRej);
+            System.out.println("Q  " + Q);
+            double Wo = Lo / A;
+            double Wc = 1 / (1 - pi1) + (Lo + K2) / A;
+            System.out.println("Wo  " + Wo);
+            System.out.println("Wc  " + Wc);
+            result += "Pотк=" + pRej + "\n" + "Pблок=" + pBlock + "\n" + "Qотн=" + Q + "\n" + "A=" + A + "\n" + "Wo=" + Wo + "\n" + "Wc=" + Wc + "\n" +
+                    "Lo=" + Lo + "\n" + "Lc=" + Lc + "\nK1=" + K1 + "\n" + "K2=" + K2 + "\n";
             resultField.setText(result);
         });
     }

@@ -9,13 +9,15 @@ public class Queue {
         state = 0;
     }
 
-
     public void setState(int state) {
         this.state = state;
     }
 
-
     public int getState() {
         return state;
+    }
+
+    public int getLimit() {
+        return limit;
     }
 }
