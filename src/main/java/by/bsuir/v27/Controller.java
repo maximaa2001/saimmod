@@ -83,12 +83,39 @@ public class Controller {
             System.out.println("pRej " + pRej);
             System.out.println("Q  " + Q);
             double Wo = Lo / A;
-            double Wc = 1 / (1 - pi1) + (Lo + K2) / A;
+          //  double Wc = 1 / (1 - pi1) + (Lo + K2) / A;
             System.out.println("Wo  " + Wo);
-            System.out.println("Wc  " + Wc);
-            result += "Pотк=" + pRej + "\n" + "Pблок=" + pBlock + "\n" + "Qотн=" + Q + "\n" + "A=" + A + "\n" + "Wo=" + Wo + "\n" + "Wc=" + Wc + "\n" +
+          //  System.out.println("Wc  " + Wc);
+            Map<State, Integer> countStates1 = smo.getCountStates();
+            Iterator<Map.Entry<State, Integer>> iterator1 = countStates1.entrySet().iterator();
+            int a = 0;
+            int b = 0;
+            int c = 0;
+            while (iterator1.hasNext()) {
+                Map.Entry<State, Integer> next = iterator1.next();
+                if(next.getKey().getChannel1State() > 0) {
+                    a += next.getValue();
+                }
+                if(next.getKey().getChannel2State() > 0) {
+                    c += next.getValue();
+                }
+                if(next.getKey().getQueueState() > 0) {
+                    switch (next.getKey().getQueueState()) {
+                        case 1:
+                            b += next.getValue();
+                            break;
+                        case 2:
+                            b += 2 * next.getValue();
+                            break;
+                    }
+                }
+            }
+            double W = ((double)a / smo.WC1end) + ((double) b / smo.WQend) + ((double) c/smo.getFinishCount());
+            System.out.println("Wc " + W);
+            result += "Pотк=" + pRej + "\n" + "Pблок=" + pBlock + "\n" + "Qотн=" + Q + "\n" + "A=" + A + "\n" + "Wo=" + Wo + "\n" + "Wc=" + W + "\n" +
                     "Lo=" + Lo + "\n" + "Lc=" + Lc + "\nK1=" + K1 + "\n" + "K2=" + K2 + "\n";
             resultField.setText(result);
+
         });
     }
 }

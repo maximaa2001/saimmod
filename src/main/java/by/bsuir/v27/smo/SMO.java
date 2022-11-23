@@ -24,6 +24,9 @@ public class SMO {
     private int queueLength = 0;
     private int systemLength = 0;
 
+    public int WC1end = 0;
+    public int WQend = 0;
+
     public SMO(double pi1, double pi2, int limitQueue) {
         source = new Source();
         channel1 = new Channel(pi1);
@@ -41,6 +44,7 @@ public class SMO {
                 if (queue.getState() > 0) {
                     queue.setState(queue.getState() - 1);
                     channel2.setState(1);
+                    WQend++;
                 }
             }
 
@@ -51,7 +55,9 @@ public class SMO {
         if (channel1.getState() == 1) {
             chanel1State++;
             if((1 - channel1.getPi()) > number2) {
+                WC1end++;
                 if (queue.getState() < queue.getLimit()) {
+                 //   WQend++;
                     channel1.setState(0);
                     queue.setState(queue.getState() + 1);
                 } else {
